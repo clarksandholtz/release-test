@@ -35,3 +35,7 @@
 *.thm
 .DS_Store
 *.bak
+__pycache__
+venv
+checkpoints/*.pth
+scripted_models
