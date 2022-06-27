@@ -112,6 +112,8 @@ class PytorchOcr():
             # self.model = nn.DataParallel(self.model)
             self.model.load_state_dict(torch.load(model_path, map_location='cpu'))
         self.model.eval()
+        self.scripted_model = torch.jit.script(self.model)
+        # self.scripted_model.save("scripted_ocr_model.pt")
         self.converter = strLabelConverter(self.alphabet)
 
     def recognize(self, img):
@@ -127,7 +129,13 @@ class PytorchOcr():
         if self.cuda:
             image = image.cuda()
 
-        preds = self.model(image)
+        print(self.cuda)
+        print(image.shape)
+        # # Use torch.jit.trace to generate a torch.jit.ScriptModule via tracing.
+        # traced_script_module = torch.jit.trace(self.model, image)
+        # # Save the TorchScript model
+        # traced_script_module.save("traced_ocr_model.pt")
+        preds = self.scripted_model(image)
 
         _, preds = preds.max(2)
         preds = preds.transpose(1, 0).contiguous().view(-1)
@@ -146,7 +154,3 @@ if __name__ == '__main__':
     h, w = img.shape[:2]
     res = recognizer.recognize(img)
     print(res)
-
-
-
-
